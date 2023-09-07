@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpartaFlix</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://kit.fontawesome.com/7f620221f2.js"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        background-color: black;
+      }
+      .main-carouselImg {
+        object-fit: cover;
+        height: 60vh;
+      }
+      .carousel-item > h1 {
+        position: absolute;
+        color: white;
+        width: 100%;
+        text-align: center;
+        top: 50%;
+      }
+      .carousel-caption {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+      }
+      .search-area {
+        margin-right: 2em;
+      }
+      .posting-card {
+        height: 350px;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 1em;
+        border-radius: 10px;
+      }
+      .add-card {
+        height: 350px;
+        margin-bottom: 1em;
+        border: 1px white solid;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        transition: 0.3s;
+        border-radius: 10px;
+      }
+      .add-card:hover {
+        background-color: rgba(221, 221, 2, 0.705);
+        color: black;
+      }
+
+      .posting-card > h5 {
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+        width: fit-content;
+        padding: 5px 10px;
+        color: white;
+        margin-bottom: 1.5em;
+        align-self: center;
+      }
+      .posting-list-area {
+        margin: 2em auto 0 auto;
+      }
+      .close-icon {
+        color: white;
+        padding: 1em;
+      }
+      .posting-input-area {
+        color: white;
+        overflow: hidden;
+        margin: 1em auto 0 auto;
+        width: 50%;
+        height: 0px;
+        transition: 0.5s;
+        max-height: 400px;
+      }
+      .choose-movieImg {
+        object-fit: cover;
+        object-position: center;
+      }
+      .before-search {
+        border: 1px solid white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      @media screen and (max-width: 450px) {
+        .add-card {
+          height: 100px;
+        }
+        .posting-input-area {
+          max-height: 400px;
+        }
+        .posting-list-area {
+          margin: 0 auto 0 auto;
+        }
+      }
+    </style>
+
+    <script type="module">
+      const OPTIONS = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjNDVhNjJlYmEwMjExZDc4YjgxYWUyMzI3ZWNhNjgyZiIsInN1YiI6IjY0YjI5Mzk5Mzc4MDYyMDBmZjM4N2UyZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8UaTRGLM2eoPK8c0wmZm01o7zS9r1Vij9ZWBfYJqCI4",
+        },
+      };
+      let chooseId;
+
+      $("#open-postingBox").click(function () {
+        $("#posting-input-area").height() !== 0
+          ? $("#posting-input-area").css({ height: "0" })
+          : $("#posting-input-area").css({ height: "800px" });
+      });
+
+      //영화 추가
+      $('#add-postingCard').click( async function(){
+        const url = new URL(
+          `https://api.themoviedb.org/3/movie/${chooseId}`
+        );
+        await fetch(url, OPTIONS)
+          .then((res) => res.json())
+          .then((data) => {
+            const { original_title, poster_path } = data;
+            const innerHtml = `<div class="col-md-3">
+                <div class="posting-card" style="background-image: url('${
+                  poster_path
+                    ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
+                      poster_path
+                    : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
+                }');">
+                <i class="fa-solid fa-x close-icon"></i>
+                <h5>${original_title}</h5>
+                </div>
+            </div>`;
+            $("#posting-list-area").append(innerHtml);
+          });
+          
+        alert('영화가 추가 되었습니다.');
+      })
+
+      //영화 선택
+      $(document).on("click", "button[name='choose']", function () {
+        chooseId=$(this).val();
+        alert('영화가 선택되었습니다.');
+      });
+
+      // 영화 검색
+      $("#search-movie").click(async function () {
+        $("#search-movie-area").empty();
+        const query = $("#user-search-keyword").val();
+        const url = new URL(
+          `https://api.themoviedb.org/3/search/movie?query=${query}`
+        );
+
+        await fetch(url, OPTIONS)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.results.length) {
+              $("#before-search").css("display", "none");
+              const searchMovies = data.results;
+              console.log(searchMovies);
+              searchMovies.forEach(
+                ({ original_title, poster_path, id }, index) => {
+                  let innerHtml = "";
+                  if (index === 0) {
+                    innerHtml = `<div class="carousel-item active">
+                                        <img src="${
+                                          poster_path
+                                            ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
+                                              poster_path
+                                            : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
+                                        }" class="d-block w-100 h-100 choose-movieImg" alt="...">
+                                        <div class="carousel-caption d-md-block">
+                                            <h5>${original_title}</h5>
+                                            <button name="choose" value=${id}>영화 선택</button>
+                                        </div>
+                                    </div>`;
+                  } else {
+                    innerHtml = `<div class="carousel-item">
+                                        <img src="${
+                                          poster_path
+                                            ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
+                                              poster_path
+                                            : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
+                                        }" class="d-block w-100 h-100 choose-movieImg" alt="...">
+                                        <div class="carousel-caption d-md-block">
+                                            <h5>${original_title}</h5>
+                                            <button name="choose" value=${id}>영화 선택</button>
+                                        </div>
+                                    </div>`;
+                  }
+
+                  $("#search-movie-area").append(innerHtml);
+                }
+              );
+            } else {
+              alert("검색 결과가 없습니다.");
+            }
+          });
+      });
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-transparent" data-bs-theme="dark">
+      <div class="container-fluid">
+        <a class="navbar-brand text-danger" href="#">SpartaFilx</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="#">홈</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">시리즈</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">영화</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">내가 찜한 콘텐츠</a>
+            </li>
+          </ul>
+          <form class="d-flex search-area" role="search">
+            <input
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button class="btn btn-danger" type="submit">Search</button>
+          </form>
+          <div>
+            <button class="btn btn-outline-warning" type="submit">Login</button>
+            <button class="btn btn-outline-warning" type="submit">
+              SignUp
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div>
+      <div
+        id="carouselExampleAutoplaying"
+        class="carousel slide"
+        data-bs-ride="carousel"
+      >
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img
+              src="https://cdn.manzlab.com/news/photo/202112/16969_37163_2536.jpg"
+              class="d-block w-100 main-carouselImg"
+              alt="..."
+            />
+            <div class="carousel-caption d-md-block">
+              <h2>킹덤</h2>
+              <p>
+                병든 왕을 둘러싸고 흉흉한 소문이 떠돈다. 어둠에 뒤덮인 조선,
+                기이한 역병에 신음하는 산하. 정체 모를 악에 맞서 백성을 구원할
+                희망은 오직 세자뿐이다.
+              </p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img
+              src="https://cdn.dailycnc.com/news/photo/202307/220260_228744_4230.jpg"
+              class="d-block w-100 main-carouselImg"
+              alt="..."
+            />
+            <div class="carousel-caption d-md-block">
+              <h2>D.P</h2>
+              <p>
+                탈영병을 잡는다. 이등병 준호에게 떨어진 새로운 임무. 그는
+                탈영병들을 추적하며 지독하게 고통스러운 현실을 마주한다. 그리고
+                아무리 도망쳐도 벗어날 수 없다는 것도 알게 된다.
+              </p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img
+              src="https://thumbnews.nateimg.co.kr/view610///news.nateimg.co.kr/orgImg/cb/2023/07/04/202307041100040495_0.jpg"
+              class="d-block w-100 main-carouselImg"
+              alt="..."
+            />
+            <div class="carousel-caption d-md-block">
+              <h2>무빙</h2>
+              <p>
+                초능력을 숨긴 채 현재를 살아가는 아이들과, 과거의 아픈 비밀을
+                숨긴 채 살아온 부모들이 시대와 세대를 넘어 닥치는 거대한 위험에
+                함께 맞서는 초능력 액션 히어로물
+              </p>
+            </div>
+          </div>
+        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#carouselExampleAutoplaying"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#carouselExampleAutoplaying"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="posting-input-area row" id="posting-input-area">
+      <div id="carouselExample" class="carousel slide col-md-6">
+        <div class="col-md-6 before-search" id="before-search">
+          영화를 검색해주세요
+        </div>
+        <div class="carousel-inner" id="search-movie-area"></div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#carouselExample"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#carouselExample"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+
+      <div class="col-md-6 posting--input">
+        <input id="user-search-keyword" />
+        <button id="search-movie">영화 검색</button>
+        <div>영화에 대한 코멘트</div>
+        <input />
+
+        <button id="add-postingCard">완료</button>
+      </div>
+    </div>
+
+    <div class="posting-list-area row container" id="posting-list-area">
+      <div class="col-md-3">
+        <div class="add-card" id="open-postingBox">
+          <h2>추가하기</h2>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
