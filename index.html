@@ -42,7 +42,7 @@
         margin-right: 2em;
       }
       .posting-card {
-        height: 350px;
+        height: 400px;
         background-size: cover;
         background-position: center;
         display: flex;
@@ -53,7 +53,7 @@
         border-radius: 10px;
       }
       .add-card {
-        height: 350px;
+        height: 400px;
         margin-bottom: 1em;
         border: 1px white solid;
         display: flex;
@@ -89,14 +89,21 @@
         color: white;
         overflow: hidden;
         margin: 1em auto 0 auto;
-        width: 50%;
+        width: 50vw;
         height: 0px;
         transition: 0.5s;
-        max-height: 400px;
+        max-height: 600px;
+        justify-content: center;
+        align-items: center;
+      }
+      .sub-carousel {
+        max-height: 600px;
       }
       .choose-movieImg {
         object-fit: cover;
         object-position: center;
+        width: 100%;
+        max-height: 600px;
       }
       .before-search {
         border: 1px solid white;
@@ -106,16 +113,25 @@
         width: 100%;
         height: 100%;
       }
+      .posting-input>div{
+        margin-bottom: 2em;
+      }
 
-      @media screen and (max-width: 450px) {
+      @media screen and (max-width: 990px) {
         .add-card {
           height: 100px;
         }
         .posting-input-area {
-          max-height: 400px;
+          width: 80vw;
+          max-height: 1000px;
         }
         .posting-list-area {
-          margin: 0 auto 0 auto;
+          margin: 1em auto 0 auto;
+        }
+
+        .posting-input {
+          height: fit-content;
+          text-align: center;
         }
       }
     </style>
@@ -134,19 +150,17 @@
       $("#open-postingBox").click(function () {
         $("#posting-input-area").height() !== 0
           ? $("#posting-input-area").css({ height: "0" })
-          : $("#posting-input-area").css({ height: "800px" });
+          : $("#posting-input-area").css({ height: "75vh" });
       });
 
       //영화 추가
-      $('#add-postingCard').click( async function(){
-        const url = new URL(
-          `https://api.themoviedb.org/3/movie/${chooseId}`
-        );
+      $("#add-postingCard").click(async function () {
+        const url = new URL(`https://api.themoviedb.org/3/movie/${chooseId}`);
         await fetch(url, OPTIONS)
           .then((res) => res.json())
           .then((data) => {
             const { original_title, poster_path } = data;
-            const innerHtml = `<div class="col-md-3">
+            const innerHtml = `<div class="col-lg-3">
                 <div class="posting-card" style="background-image: url('${
                   poster_path
                     ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
@@ -159,14 +173,14 @@
             </div>`;
             $("#posting-list-area").append(innerHtml);
           });
-          
-        alert('영화가 추가 되었습니다.');
-      })
+
+        alert("영화가 추가 되었습니다.");
+      });
 
       //영화 선택
       $(document).on("click", "button[name='choose']", function () {
-        chooseId=$(this).val();
-        alert('영화가 선택되었습니다.');
+        chooseId = $(this).val();
+        alert("영화가 선택되었습니다.");
       });
 
       // 영화 검색
@@ -194,7 +208,7 @@
                                             ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
                                               poster_path
                                             : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
-                                        }" class="d-block w-100 h-100 choose-movieImg" alt="...">
+                                        }" class="d-block choose-movieImg" alt="...">
                                         <div class="carousel-caption d-md-block">
                                             <h5>${original_title}</h5>
                                             <button name="choose" value=${id}>영화 선택</button>
@@ -207,7 +221,7 @@
                                             ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
                                               poster_path
                                             : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
-                                        }" class="d-block w-100 h-100 choose-movieImg" alt="...">
+                                        }" class="d-block choose-movieImg" alt="...">
                                         <div class="carousel-caption d-md-block">
                                             <h5>${original_title}</h5>
                                             <button name="choose" value=${id}>영화 선택</button>
@@ -348,43 +362,49 @@
     </div>
 
     <div class="posting-input-area row" id="posting-input-area">
-      <div id="carouselExample" class="carousel slide col-md-6">
-        <div class="col-md-6 before-search" id="before-search">
-          영화를 검색해주세요
+      <div class="col-lg-6 poster-area">
+        <!--기본-->
+        <div class="before-search" id="before-search">영화를 검색해주세요</div>
+        <div id="carouselExample" class="carousel slide sub-carousel">
+          <div class="carousel-inner" id="search-movie-area"></div>
+
+          <button
+            class="carousel-control-prev"
+            type="button"
+            data-bs-target="#carouselExample"
+            data-bs-slide="prev"
+          >
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button
+            class="carousel-control-next"
+            type="button"
+            data-bs-target="#carouselExample"
+            data-bs-slide="next"
+          >
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
         </div>
-        <div class="carousel-inner" id="search-movie-area"></div>
-        <button
-          class="carousel-control-prev"
-          type="button"
-          data-bs-target="#carouselExample"
-          data-bs-slide="prev"
-        >
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button
-          class="carousel-control-next"
-          type="button"
-          data-bs-target="#carouselExample"
-          data-bs-slide="next"
-        >
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
       </div>
 
-      <div class="col-md-6 posting--input">
-        <input id="user-search-keyword" />
-        <button id="search-movie">영화 검색</button>
-        <div>영화에 대한 코멘트</div>
-        <input />
-
-        <button id="add-postingCard">완료</button>
+      <div class="col-lg-6 posting-input">
+        <div>
+          <div>영화 검색</div>
+          <input id="user-search-keyword" />
+          <button id="search-movie">검색</button>
+        </div>
+        <div>
+          <div>영화에 대한 코멘트</div>
+          <input />
+          <button id="add-postingCard">완료</button>
+        </div>
       </div>
     </div>
 
     <div class="posting-list-area row container" id="posting-list-area">
-      <div class="col-md-3">
+      <div class="col-lg-3">
         <div class="add-card" id="open-postingBox">
           <h2>추가하기</h2>
         </div>
