@@ -105,16 +105,41 @@
         width: 100%;
         max-height: 600px;
       }
+
       .before-search {
-        border: 1px solid white;
         display: flex;
         justify-content: center;
         align-items: center;
         width: 100%;
-        height: 100%;
+        padding:1em;
       }
+
       .posting-input>div{
         margin-bottom: 2em;
+      }
+      .carousel-button{
+        display: none;
+      }
+      .choose-btn{
+        border: 1px white solid;
+        border-radius: 5px;
+        background-color: transparent;
+        color: white;
+      }
+      .posting-inputArea{
+        background-color: rgba(73, 73, 73, 0.5);
+        border: 1px solid white;
+        border-radius: 3px;
+        color: white;
+      }
+      .posting-button{
+        border: 1px white solid;
+        border-radius: 5px;
+        background-color: transparent;
+        color: white;
+      }
+      .posting-text{
+        margin: 0.5em;
       }
 
       @media screen and (max-width: 990px) {
@@ -173,7 +198,6 @@
             </div>`;
             $("#posting-list-area").append(innerHtml);
           });
-
         alert("영화가 추가 되었습니다.");
       });
 
@@ -195,6 +219,8 @@
           .then((res) => res.json())
           .then((data) => {
             if (data.results.length) {
+              $("#carousel-button-prev").css("display", "block");
+              $("#carousel-button-next").css("display", "block");
               $("#before-search").css("display", "none");
               const searchMovies = data.results;
               console.log(searchMovies);
@@ -211,7 +237,7 @@
                                         }" class="d-block choose-movieImg" alt="...">
                                         <div class="carousel-caption d-md-block">
                                             <h5>${original_title}</h5>
-                                            <button name="choose" value=${id}>영화 선택</button>
+                                            <button name="choose" value=${id} class="choose-btn">영화 선택</button>
                                         </div>
                                     </div>`;
                   } else {
@@ -224,7 +250,7 @@
                                         }" class="d-block choose-movieImg" alt="...">
                                         <div class="carousel-caption d-md-block">
                                             <h5>${original_title}</h5>
-                                            <button name="choose" value=${id}>영화 선택</button>
+                                            <button name="choose" value=${id} class="choose-btn">영화 선택</button>
                                         </div>
                                     </div>`;
                   }
@@ -369,16 +395,19 @@
           <div class="carousel-inner" id="search-movie-area"></div>
 
           <button
-            class="carousel-control-prev"
+            class="carousel-control-prev carousel-button"
             type="button"
+            id="carousel-button-prev"
             data-bs-target="#carouselExample"
             data-bs-slide="prev"
           >
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
             <span class="visually-hidden">Previous</span>
           </button>
+
           <button
-            class="carousel-control-next"
+            class="carousel-control-next carousel-button"
+            id="carousel-button-next"
             type="button"
             data-bs-target="#carouselExample"
             data-bs-slide="next"
@@ -391,14 +420,14 @@
 
       <div class="col-lg-6 posting-input">
         <div>
-          <div>영화 검색</div>
-          <input id="user-search-keyword" />
-          <button id="search-movie">검색</button>
+          <div class="posting-text"><i class="fa-solid fa-video" ></i>영화 검색</div>
+          <input id="user-search-keyword" class="posting-inputArea" placeholder="영화 제목"/>
+          <button id="search-movie" class="posting-button">검색</button>
         </div>
         <div>
-          <div>영화에 대한 코멘트</div>
-          <input />
-          <button id="add-postingCard">완료</button>
+          <div class="posting-text"><i class="fa-solid fa-video"></i>영화에 대한 코멘트</div>
+          <input  class="posting-inputArea" placeholder="영화 코멘트"/>
+          <button id="add-postingCard" class="posting-button">완료</button>
         </div>
       </div>
     </div>
