@@ -70,20 +70,27 @@
         color: black;
       }
 
-      .posting-card > h5 {
+      .movieCardInfo{
         background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
         width: fit-content;
         padding: 5px 10px;
         color: white;
         margin-bottom: 1.5em;
         align-self: center;
+        text-align: center;
+      }
+      .movieCardInfo > h5{
+        font-weight: bold;
       }
       .posting-list-area {
         margin: 2em auto 0 auto;
       }
       .close-icon {
         color: white;
-        padding: 1em;
+        font-weight: bold;
+        margin: 1em;
+        border: none;
+        background: rgba(0, 0, 0, 0.5);
       }
       .posting-input-area {
         color: white;
@@ -162,6 +169,41 @@
     </style>
 
     <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+      import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js';
+      import { doc, setDoc, collection, getDocs, deleteDoc} from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"; 
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyBCRtnQasPnOrIwbSAfN2gQdWYqrkiwMzg",
+        authDomain: "sparta-c48a5.firebaseapp.com",
+        projectId: "sparta-c48a5",
+        storageBucket: "sparta-c48a5.appspot.com",
+        messagingSenderId: "823259035177",
+        appId: "1:823259035177:web:2efbea644a5e0710a30e38",
+        measurementId: "G-P79TQTLFWQ"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // FireStore 데이터 읽기
+      const querySnapshot = await getDocs(collection(db, "movies"));
+      querySnapshot.forEach((doc) => {
+        const {title, poster, comment}=doc.data();
+
+        const innerHtml = `<div class="col-lg-3">
+                <div class="posting-card" style="background-image: url('${poster}');">
+                <button class="close-icon" name='deleteItem' value="${title}"><i class="fa-solid fa-x"></i></button>
+                <div class='movieCardInfo'>
+                  <h5>${title}</h5>
+                  ${comment ? `<p>"${comment}"</p>` :""}
+                </div>
+                </div>
+            </div>`;
+            $("#posting-list-area").append(innerHtml);
+      });
+
+      //TMDB API KEY
       const OPTIONS = {
         method: "GET",
         headers: {
@@ -170,55 +212,42 @@
             "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjNDVhNjJlYmEwMjExZDc4YjgxYWUyMzI3ZWNhNjgyZiIsInN1YiI6IjY0YjI5Mzk5Mzc4MDYyMDBmZjM4N2UyZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.8UaTRGLM2eoPK8c0wmZm01o7zS9r1Vij9ZWBfYJqCI4",
         },
       };
-      let chooseId;
 
+      //TMDB API 호출
+      async function getMovieApi (url){
+        const res = await fetch(url, OPTIONS);
+        const data = await res.json();
+        return data;
+      }
+
+
+      //추가하기 버튼 클릭 이벤트
       $("#open-postingBox").click(function () {
         $("#posting-input-area").height() !== 0
           ? $("#posting-input-area").css({ height: "0" })
           : $("#posting-input-area").css({ height: "75vh" });
       });
+      
 
-      //영화 추가
-      $("#add-postingCard").click(async function () {
-        const url = new URL(`https://api.themoviedb.org/3/movie/${chooseId}`);
-        await fetch(url, OPTIONS)
-          .then((res) => res.json())
-          .then((data) => {
-            const { original_title, poster_path } = data;
-            const innerHtml = `<div class="col-lg-3">
-                <div class="posting-card" style="background-image: url('${
-                  poster_path
-                    ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" +
-                      poster_path
-                    : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930"
-                }');">
-                <i class="fa-solid fa-x close-icon"></i>
-                <h5>${original_title}</h5>
-                </div>
-            </div>`;
-            $("#posting-list-area").append(innerHtml);
-          });
-        alert("영화가 추가 되었습니다.");
-      });
+      //영화 삭제, FireStore 문서 삭제
+      $(document).on('click',"button[name='deleteItem']",async function(){
+        let confirmAnswer = confirm('정말 삭제하겠습니까?');
+        if (confirmAnswer){
+          await deleteDoc(doc(db, "movies", $(this).val()));
+          window.location.reload();
+        }
+      })
 
-      //영화 선택
-      $(document).on("click", "button[name='choose']", function () {
-        chooseId = $(this).val();
-        alert("영화가 선택되었습니다.");
-      });
-
-      // 영화 검색
-      $("#search-movie").click(async function () {
+      /*TMDB 키워드로 영화 찾기 기능*/ 
+      //영화 찾기 함수
+      async function searchMovie (){
         $("#search-movie-area").empty();
         const query = $("#user-search-keyword").val();
         const url = new URL(
           `https://api.themoviedb.org/3/search/movie?query=${query}`
         );
-
-        await fetch(url, OPTIONS)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.results.length) {
+        const data = await getMovieApi(url);
+        if (data.results.length) {
               $("#carousel-button-prev").css("display", "block");
               $("#carousel-button-next").css("display", "block");
               $("#before-search").css("display", "none");
@@ -261,8 +290,60 @@
             } else {
               alert("검색 결과가 없습니다.");
             }
-          });
+      }
+
+      $("#search-movie").click(async function () {
+        searchMovie();
       });
+
+      $("#user-search-keyword").keypress(async function(e){
+        if(e.key === 'Enter') searchMovie();
+      })
+      
+
+      //영화 선택
+      $(document).on("click", "button[name='choose']", function () {
+        chooseId = $(this).val();
+        alert("영화가 선택되었습니다.");
+      });
+
+
+      /*영화 추가, FireStore 문서 추가*/
+      let chooseId;
+      //TMDB ID Search 및 FireStore 추가 함수
+      async function addMovie(){
+        const comment = $('#commentInput').val();
+        const url = new URL(`https://api.themoviedb.org/3/movie/${chooseId}`);
+        const data = await getMovieApi(url);
+        console.log(data);
+        const { original_title, poster_path } = data;
+        const poster = poster_path
+                ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" + poster_path
+                : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg?20200913095930";
+        try {
+          await setDoc(doc(db, "movies", original_title), {
+            title: original_title,
+            poster: poster,
+            comment: comment
+          });
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
+        alert("영화가 추가 되었습니다.");
+        window.location.reload();
+      }
+
+
+      $("#add-postingCard").click(function () {
+        chooseId ? addMovie() : alert('영화를 먼저 선택하세요');
+      });
+
+      $('#commentInput').keypress(function(e){
+        if(e.key==="Enter"){
+          chooseId ? addMovie():alert('영화를 먼저 선택하세요');
+        }
+         
+      })
     </script>
   </head>
   <body>
@@ -352,7 +433,7 @@
           </div>
           <div class="carousel-item">
             <img
-              src="https://thumbnews.nateimg.co.kr/view610///news.nateimg.co.kr/orgImg/cb/2023/07/04/202307041100040495_0.jpg"
+              src="https://thumb.mt.co.kr/06/2023/08/2023080315537241129_1.jpg/dims/optimize/"
               class="d-block w-100 main-carouselImg"
               alt="..."
             />
@@ -426,7 +507,7 @@
         </div>
         <div>
           <div class="posting-text"><i class="fa-solid fa-video"></i>영화에 대한 코멘트</div>
-          <input  class="posting-inputArea" placeholder="영화 코멘트"/>
+          <input  class="posting-inputArea" placeholder="영화 코멘트" id="commentInput"/>
           <button id="add-postingCard" class="posting-button">완료</button>
         </div>
       </div>
