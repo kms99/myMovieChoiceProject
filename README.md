@@ -10,6 +10,8 @@
 
 **Database** : google FireStore
 
+**웹 호스팅 링크** : https://kms99.github.io/myMovieChoiceProject/
+
 
 ## 웹 디자인
 
