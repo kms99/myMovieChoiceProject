@@ -97,9 +97,8 @@
         overflow: hidden;
         margin: 1em auto 0 auto;
         width: 50vw;
-        height: 0px;
         transition: 0.5s;
-        max-height: 600px;
+        max-height: 0px;
         justify-content: center;
         align-items: center;
       }
@@ -155,7 +154,6 @@
         }
         .posting-input-area {
           width: 80vw;
-          max-height: 1000px;
         }
         .posting-list-area {
           margin: 1em auto 0 auto;
@@ -223,9 +221,9 @@
 
       //추가하기 버튼 클릭 이벤트
       $("#open-postingBox").click(function () {
-        $("#posting-input-area").height() !== 0
-          ? $("#posting-input-area").css({ height: "0" })
-          : $("#posting-input-area").css({ height: "75vh" });
+        $("#posting-input-area").css('maxHeight') !== '0px'
+          ? $("#posting-input-area").css({'maxHeight':'0px'})
+          : $("#posting-input-area").css({'maxHeight':'100vh'})
       });
       
 
@@ -252,7 +250,6 @@
               $("#carousel-button-next").css("display", "block");
               $("#before-search").css("display", "none");
               const searchMovies = data.results;
-              console.log(searchMovies);
               searchMovies.forEach(
                 ({ original_title, poster_path, id }, index) => {
                   let innerHtml = "";
@@ -315,7 +312,6 @@
         const comment = $('#commentInput').val();
         const url = new URL(`https://api.themoviedb.org/3/movie/${chooseId}`);
         const data = await getMovieApi(url);
-        console.log(data);
         const { original_title, poster_path } = data;
         const poster = poster_path
                 ? "https://www.themoviedb.org/t/p/w300_and_h450_bestv2" + poster_path
@@ -468,7 +464,7 @@
       </div>
     </div>
 
-    <div class="posting-input-area row" id="posting-input-area">
+    <div class="posting-input-area row" id="posting-input-area" style="max-height: 0px">
       <div class="col-lg-6 poster-area">
         <!--기본-->
         <div class="before-search" id="before-search">영화를 검색해주세요</div>
